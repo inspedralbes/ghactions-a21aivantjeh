@@ -19,6 +19,8 @@ jobs:
       - name: Instalar dependencias
         run: |
           cd front
+          ls -la
+          echo "Contenido del directorio 'front':"
           npm install  # Use npm install instead of npm ci
           
       - name: Construir aplicación
@@ -57,5 +59,3 @@ jobs:
           scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "~/prod_key.pem" dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR }}
 
       - run: echo "🍏 El estado de este job es ${{ job.status }}."
-
-    
