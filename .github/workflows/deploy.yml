@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Obtener el código del repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         
       - name: Configurar Node.js
         uses: actions/setup-node@v3
