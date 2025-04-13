@@ -6,6 +6,7 @@ on: [push]
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Obtener el código del repositorio
         uses: actions/checkout@v4
@@ -16,11 +17,15 @@ jobs:
           node-version: '18'
           cache: 'npm'
           
-      - name: Instalar dependencias
+      - name: Limpiar e instalar dependencias
         run: |
           cd front
-          npm install  # Use npm install instead of npm ci
-          
+          rm -rf node_modules
+          npm install # Reinstalar dependencias para evitar conflictos
+
+      - name: Configurar variable de entorno para LightningCSS
+        run: echo "CSS_TRANSFORMER_WASM=1" >> $GITHUB_ENV
+
       - name: Construir aplicación
         run: |
           cd front
@@ -37,6 +42,7 @@ jobs:
   desplegar-a-produccion:
     runs-on: ubuntu-latest
     needs: [build-and-deploy]
+
     steps:
       - name: Obtener el código del repositorio
         uses: actions/checkout@v4
@@ -57,5 +63,3 @@ jobs:
           scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "~/prod_key.pem" dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR }}
 
       - run: echo "🍏 El estado de este job es ${{ job.status }}."
-
-    
