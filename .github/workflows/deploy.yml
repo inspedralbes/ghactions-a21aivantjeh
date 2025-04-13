@@ -1,5 +1,5 @@
 name: Despliegue automático con GitHub Actions
-run-name: Subida a producción 
+run-name: Subida a producción de la aplicación
 
 on: [push]
 
