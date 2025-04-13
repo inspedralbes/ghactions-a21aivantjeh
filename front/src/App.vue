@@ -1,8 +1,8 @@
 <template>
-  <div class="p-4 flex flex-col items-center justify-center min-h-screen bg-gray-100 gap-5">
-    <p class="text-3xl font-bold border-b border-gray-400 text-gray-500">Calculadora</p>
+  <div class="container">
+    <p class="title">Calculadora</p>
     <Calculator />
-    <p class="text-xs text-gray-400">Aivan Antonio</p>
+    <p class="author">Aivan Antonio</p>
   </div>
 </template>
 
@@ -15,3 +15,30 @@ export default {
   }
 }
 </script>
+
+<style>
+.container {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  gap: 1.25rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  /* 30px */
+  font-weight: bold;
+  border-bottom: 1px solid #9ca3af;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.author {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+</style>
