@@ -19,7 +19,7 @@ jobs:
       - name: Instalar dependencias
         run: |
           cd front
-          ls -la
+          ls
           echo "Contenido del directorio 'front':"
           npm install  # Use npm install instead of npm ci
           
