@@ -18,8 +18,14 @@ jobs:
       - name: Instalar dependencias
         run: |
           cd front
+          rm -rf node_modules package-lock.json
           npm ci
           
+      - name: Rebuild native modules
+        run: |
+          cd front
+          npm rebuild
+
       - name: Construir aplicación
         run: |
           cd front
