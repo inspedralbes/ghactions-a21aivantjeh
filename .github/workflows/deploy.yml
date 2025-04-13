@@ -1,18 +1,16 @@
-name: Deploy to Production
+name: Despliegue automático con GitHub Actions
+run-name: Subida a producción 
 
-on:
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Obtener el código del repositorio
+        uses: actions/checkout@v4
         
-      - name: Deploy to production server
+      - name: Desplegar a producción
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
