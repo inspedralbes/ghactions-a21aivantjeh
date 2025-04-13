@@ -14,30 +14,46 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
           
       - name: Instalar dependencias
         run: |
           cd front
-          rm -rf node_modules package-lock.json
-          npm ci
+          npm install  # Use npm install instead of npm ci
           
-      - name: Rebuild native modules
-        run: |
-          cd front
-          npm rebuild
-
       - name: Construir aplicación
         run: |
           cd front
           npm run build
-          
-      - name: Desplegar a producción
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rltgoDzvO --delete"
-          SOURCE: "front/dist/"
-          REMOTE_HOST: ${{ secrets.SSH_HOST }}
-          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
-          TARGET: ${{ secrets.REMOTE_DIR }}
-          EXCLUDE: "/.git/, /.github/, /node_modules/"
+
+      - name: Verificar resultado de la build
+        run: ls -la front/dist || echo "⚠️ ¡Directorio 'dist' no existe!"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-build
+          path: front/dist
+
+  desplegar-a-produccion:
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy]
+    steps:
+      - name: Obtener el código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Descargar el artifact construido
+        uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: dist
+
+      - name: Verificar contenido del directorio descargado
+        run: ls -la dist || echo "⚠️ ¡No se ha descargado nada en 'dist'!"
+
+      - name: Desplegar a producción con SCP
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/prod_key.pem
+          chmod 600 ~/prod_key.pem
+          scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "~/prod_key.pem" dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR }}
+
+      - run: echo "🍏 El estado de este job es ${{ job.status }}."
