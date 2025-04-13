@@ -25,7 +25,6 @@ jobs:
           
       - name: Construir aplicación
         run: |
-          cd front
           npm run build
 
       - name: Verificar resultado de la build
