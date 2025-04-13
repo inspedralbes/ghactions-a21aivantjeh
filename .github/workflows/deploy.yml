@@ -22,6 +22,11 @@ jobs:
           ls
           echo "Contenido del directorio 'front':"
           npm install  # Use npm install instead of npm ci
+
+      - name: Reparar módulos nativos (lightningcss)
+        run: |
+          cd front
+          npm rebuild lightningcss
           
       - name: Construir aplicación
         run: |
