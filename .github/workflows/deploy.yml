@@ -54,7 +54,7 @@ jobs:
         run: |
          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/prod_key.pem
          chmod 600 ~/prod_key.pem
-         scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "~/prod_key.pem" dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/a21aivantjeh/web/a21aivantjeh.daw.inspedralbes.cat/public_html/ghactions-a21aivantjeh
+         scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "~/prod_key.pem" dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/home/a21aivantjeh/web/a21aivantjeh.daw.inspedralbes.cat/public_html/ghactions-a21aivantjeh
 
       - name: ✅ Estat del job
         run: echo "🍏 Estat del job ${{ job.status }}"
