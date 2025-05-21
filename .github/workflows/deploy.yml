@@ -1,63 +1,62 @@
-name: Desplegament automàtic amb GitHub Actions
-run-name: Desplegament a producció de l’aplicació
+name: Preparant per producció
+run-name: ${{ github.actor }} està pujant l'aplicació a PROD 🚀
 
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Configurar Node.js 18
+    steps:
+      - name: 🔄 Checkout del repositori
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
 
-      - name: Instal·lar dependències
+      - name: 📦 Instal·lar dependències i construir
         run: |
           cd front
           npm install
-
-      - name: Reparar mòduls natius (lightningcss)
-        run: |
-          cd front
           npm rebuild lightningcss
-
-      - name: Construir aplicació
-        run: |
-          cd front
           npm run build
 
-      - name: Verificar si el directori 'dist' existeix
+      - name: 📁 Comprovar que existeix 'dist'
         run: ls -la front/dist || echo "⚠️ El directori 'dist' no existeix!"
 
-      - uses: actions/upload-artifact@v4
+      - name: ☁️ Pujar artefacte build
+        uses: actions/upload-artifact@v4
         with:
           name: app-build
           path: front/dist
 
-  Pujar-a-produccio-amb-SCP:
+  pujar-a-produccio-amb-scp:
     runs-on: ubuntu-latest
     needs: [build]
+
     steps:
-      - name: Obtenir el codi del repositori
+      - name: 🔄 Checkout del repositori
         uses: actions/checkout@v4
 
-      - name: Descarregar l'artifact construït
+      - name: 📥 Descarregar build construït
         uses: actions/download-artifact@v4
         with:
           name: app-build
           path: dist
 
-      - name: Verificar el contingut del directori descarregat
+      - name: 📁 Verificar contingut del directori 'dist'
         run: ls -la dist || echo "⚠️ No s'ha descarregat res a 'dist'!"
 
-      - name: Desplegar a producción con SCP
+      - name: 🚀 Desplegar a producció amb SCP
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/prod_key.pem
           chmod 600 ~/prod_key.pem
-          scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "~/prod_key.pem" dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR }}
+          scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+              -i ~/prod_key.pem dist/* \
+              ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR }}
 
-      - run: echo "🍏 El estado de este job es ${{ job.status }}."
+      - name: ✅ Estat del job
+        run: echo "🍏 Estat del job ${{ job.status }}"
