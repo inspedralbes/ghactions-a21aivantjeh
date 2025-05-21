@@ -54,10 +54,10 @@ jobs:
       - name: Verificar el contingut del directori descarregat
         run: ls -la dist || echo "⚠️ No s'ha descarregat res a 'dist'!"
 
-      - name: Enviar fitxers a producció via SCP
+      - name: Desplegar a producción con SCP
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/prod_key.pem
           chmod 600 ~/prod_key.pem
-          scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/prod_key.pem dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/a23brijaemed/web/a23brijaemed.daw.inspedralbes.cat/public_html/ghactions-a23BrianJaen
+          scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "~/prod_key.pem" dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR }}
 
-      - run: echo "🍏 Estat del job ${{ job.status }}"
+      - run: echo "🍏 El estado de este job es ${{ job.status }}."
