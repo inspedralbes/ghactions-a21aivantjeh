@@ -52,7 +52,7 @@ jobs:
 
       - name: 🚀 Desplegar a producció amb SCP
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/prod_key.pem
+          echo "${{ SSH_PRIVATE_KEY }}" > ~/prod_key.pem
           chmod 600 ~/prod_key.pem
           scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
               -i ~/prod_key.pem dist/* \
