@@ -4,46 +4,64 @@ run-name: Subida a producción de la aplicación
 on: [push]
 
 jobs:
- build:
-   runs-on: ubuntu-latest
-   steps:
-       - uses: actions/checkout@v4
-       - name: Use Node.js ${{ matrix.node-version }}
-         uses: actions/setup-node@v4
-         with:
-           node-version: ${{ matrix.node-version }}
-           cache: 'npm'
-       - run: npm install
-       - run: npm run build --if-present
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener el código del repositorio
+        uses: actions/checkout@v4
+        
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Instalar dependencias
+        run: |
+          cd front
+          ls
+          echo "Contenido del directorio 'front':"
+          npm install  # Use npm install instead of npm ci
 
+      - name: Reparar módulos nativos (lightningcss)
+        run: |
+          cd front
+          npm rebuild lightningcss
+          
+      - name: Construir aplicación
+        run: |
+          cd front
+          ls 
+          npm run build
 
-       # 👇 Verificar si 'dist' existe
-       - run: ls -la dist || echo "⚠️ Directori 'dist' no existeix!"
+      - name: Verificar resultado de la build
+        run: ls -la front/dist || echo "⚠️ ¡Directorio 'dist' no existe!"
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-build
+          path: front/dist
 
-       - uses: actions/upload-artifact@v4
-         with:
-           name: app-build
-           path: dist
+  desplegar-a-produccion:
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy]
+    steps:
+      - name: Obtener el código del repositorio
+        uses: actions/checkout@v4
 
+      - name: Descargar el artifact construido
+        uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: dist
 
- Pujar-a-produccio-amb-SCP:
-   runs-on: ubuntu-latest
-   needs: [build]
-   steps:
-     - name: Obtenint el codi del respositori
-       uses: actions/checkout@v4
+      - name: Verificar contenido del directorio descargado
+        run: ls -la dist || echo "⚠️ ¡No se ha descargado nada en 'dist'!"
 
+      - name: Desplegar a producción con SCP
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/prod_key.pem
+          chmod 600 ~/prod_key.pem
+          scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "~/prod_key.pem" dist/* ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_DIR }}
 
-     # 👇 Descargar el artifact del build
-     - name: Descarregant l'arxiu construït
-       uses: actions/download-artifact@v4
-       with:
-         name: app-build
-         path: dist
-
-
-     - name: Verificar contenid del directori descarregat
-       run: ls -la dist || echo "⚠️ No s'ha descarregat res a 'dist'!"
-
-     - run: echo "🍏 This job's status is ${{ job.status }}."
+      - run: echo "🍏 El estado de este job es ${{ job.status }}."
